@@ -2072,9 +2072,17 @@ $$
 >
 > Gram-Schmidt 算法
 >
-> $u_1 = v_1$ 循环 $i = 2,3,\cdots,n$ 计算 $μ_{i,j} = \frac{v_i \cdot u_j} { ||u_j||^2}$，其中 $1 ≤ j < i$。 设置 $u_i = v_i - μ\_{i,j} \cdot u_j$（对于 $1 ≤ j < i$ 求和） 循环结束
+> $u_1 = v_1$ 
 >
-> 为了测试你的代码，让我们获取标志。给定以下基底向量：
+> 循环 $i = 2,3,\cdots,n$ 
+>
+> 计算 $μ_{i,j} = \frac{v_i \cdot u_j} { ||u_j||^2}$，其中 $1 ≤ j < i$。
+>
+> 令$u_i = v_i - μ_{i,j} \cdot u_j$（对于 $1 ≤ j < i$ 求和） 
+>
+> 循环结束
+>
+> 为了测试你的代码，让我们获取`flag`。给定以下基底向量：
 >
 > $v1 = (4,1,3,-1)，v2 = (2,1,-3,4)，v3 = (1,0,-2,7)，v4 = (6, 2, 9, -5)$。
 >
@@ -2163,14 +2171,90 @@ print(abs(det(A)))
 >
 > 高斯格缩减算法
 > 循环
->   (a) 如果 $||v2|| < ||v1||$，交换 $v1$，$v2$
->   (b) 计算 $m = \lfloor \frac{v1 \cdot v2}{ v1 \cdot v1 }\rfloor$
->   (c) 如果 $m = 0$，返回 $v1，v2$
->   (d) $v2 = v2 - m \cdot v1$
+>       (a) 如果 $||v2|| < ||v1||$，交换 $v1$，$v2$
+>       (b) 计算 $m = \lfloor \frac{v1 \cdot v2}{ v1 \cdot v1 }\rfloor$
+>       (c) 如果 $m = 0$，返回 $v1，v2$
+>       (d) $v2 = v2 - m \cdot v1$
 > 继续循环
 > 请注意与欧几里得的最大公约数算法的“交换”和“缩减”步骤的相似性，以及我们对浮点数进行了四舍五入，因为在格上我们只能使用整数系数来表示我们的基向量。
 >
-> 现在是解题时间。给定两个向量 $v = (846835985, 9834798552)$和 $u = (87502093, 123094980)$，通过应用高斯格缩减算法，找到最优基。标志是新基向量的内积。
+> 现在是解题时间。给定两个向量 $v = (846835985, 9834798552)$和 $u = (87502093, 123094980)$，通过应用高斯格缩减算法，找到最优基。`flag`是新基向量的内积。
+
+##### 解题
+
+```python
+v = vector([846835985, 9834798552])
+u = vector([87502093, 123094980])
+while(1):
+	if(u*u<v*v):
+		v,u = u,v
+	m = floor((u*v)/(v*v))
+	if (m==0):
+		break
+	u = u - m*v
+print(u*v)
+#7410790865146821
+```
+
+### Lattice_lab5
+
+##### 题目描述
+
+> crypto{}
+
+##### 题目附件
+
+```python
+from Crypto.Util.number import getPrime, inverse, bytes_to_long
+import random
+import math
+
+FLAG = b'crypto{?????????????????????}'
+
+
+def gen_key():
+    q = getPrime(512)
+    upper_bound = int(math.sqrt(q // 2))
+    lower_bound = int(math.sqrt(q // 4))
+    f = random.randint(2, upper_bound)
+    while True:
+        g = random.randint(lower_bound, upper_bound)
+        if math.gcd(f, g) == 1:
+            break
+    h = (inverse(f, q)*g) % q
+    return (q, h), (f, g)
+
+
+def encrypt(q, h, m):
+    assert m < int(math.sqrt(q // 2))
+    r = random.randint(2, int(math.sqrt(q // 2)))
+    e = (r*h + m) % q
+    return e
+
+
+def decrypt(q, h, f, g, e):
+    a = (f*e) % q
+    m = (a*inverse(f, g)) % g
+    return m
+
+
+public, private = gen_key()
+q, h = public
+f, g = private
+
+m = bytes_to_long(FLAG)
+e = encrypt(q, h, m)
+
+print(f'Public key: {(q,h)}')
+print(f'Encrypted Flag: {e}')
+
+'''
+Public key: (7638232120454925879231554234011842347641017888219021175304217358715878636183252433454896490677496516149889316745664606749499241420160898019203925115292257, 2163268902194560093843693572170199707501787797497998463462129592239973581462651622978282637513865274199374452805292639586264791317439029535926401109074800)
+Encrypted Flag: 5605696495253720664142881956908624307570671858477482119657436163663663844731169035682344974286379049123733356009125671924280312532755241162267269123486523
+'''
+```
+
+
 
 # MISC
 
